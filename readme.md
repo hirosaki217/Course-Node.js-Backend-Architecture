@@ -1,4 +1,0 @@
--   Đầu tiên là babel nó có nhiệm vụ xử lý khi chúng ta sử dụng code es5 và es6 đều sẽ tương thích
--   morgan ? có nhiệm vụ log các request
--   helmet ? có nhiệm vụ ẩn các thông tin về application web tránh lộ dữ liệu bị khai thác
--   compression ? nén dữ liệu của 1 request
