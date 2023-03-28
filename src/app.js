@@ -20,7 +20,7 @@ app.use(helmet());
 app.use(compression());
 
 // init db
-require('./dbs/init.mongodb.lv0');
+require('./dbs/init.mongodb');
 // init routes
 app.get('/', (req, res) => {
     return res.status(200).json({

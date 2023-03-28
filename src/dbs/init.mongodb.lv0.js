@@ -9,7 +9,7 @@ mongoose
 
 // dev
 
-if (1 === 0) {
+if (1 === 1) {
     mongoose.set('debug', true);
     mongoose.set('debug', { color: true });
 }
