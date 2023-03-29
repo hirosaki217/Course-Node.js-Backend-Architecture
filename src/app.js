@@ -22,11 +22,7 @@ app.use(compression());
 // init db
 require('./dbs/init.mongodb');
 // init routes
-app.get('/', (req, res) => {
-    return res.status(200).json({
-        message: 'Welcome',
-    });
-});
+app.use('/', require('./routes'));
 
 // handling errors
 

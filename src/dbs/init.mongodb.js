@@ -1,11 +1,11 @@
 'use strict';
 const mongoose = require('mongoose');
+const {
+    db: { host, port, name },
+} = require('../configs/config.mongodb');
+// const { countConnect } = require('../helpers/check.connect');
 
-const connectString = `mongodb://localhost:27017/shopFlower`;
-mongoose
-    .connect(connectString)
-    .then((_) => console.log('Connected MongoDB Success'))
-    .catch((err) => console.log(`Error Connected`));
+const connectString = `mongodb://127.0.0.1:${port}/${name}`;
 
 class Database {
     constructor() {
