@@ -18,7 +18,12 @@ app.use(helmet());
 
 // nen du lieu
 app.use(compression());
-
+app.use(express.json());
+app.use(
+    express.urlencoded({
+        extended: true,
+    }),
+);
 // init db
 require('./dbs/init.mongodb');
 // init routes
