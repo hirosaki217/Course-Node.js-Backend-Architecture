@@ -4,6 +4,7 @@
 
 POST {{url_dev}}/shop/signup
 Content-Type: application/json
+x-api-key: f9369f99be7331d9e44344274f1338dc05df56e6c1b16d10682135ffe378e1a8cf581250c3efcc2d6a2f3dfe652f7be06e913bb112c80a4cbd7aa5296faa6b39
 
 {
     "name": "Shop 1234",
