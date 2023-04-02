@@ -4,9 +4,9 @@ const shopModel = require('../models/shop.model');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const KeyTokenService = require('./keyToken.service');
-const { createTokenPair } = require('../auth/authUtils');
+const { createTokenPair, verifyJWT } = require('../auth/authUtils');
 const { getInfoData } = require('../utils');
-const { BadRequestError, AuthFailureError } = require('../core/error.response');
+const { BadRequestError, AuthFailureError, ForbiddenError } = require('../core/error.response');
 const { findByEmail } = require('./shop.service');
 const RoleShop = {
     SHOP: '0000',
@@ -16,7 +16,82 @@ const RoleShop = {
 };
 
 class AccessService {
-    static logout = async ({ keyStore }) => {
+    /*
+        check token used
+    
+    */
+    static handlerRefreshToken = async ({ refreshToken }) => {
+        // check this token has been used yet
+        const foundToken = await KeyTokenService.findByRefreshTokenUsed(refreshToken);
+        if (foundToken) {
+            // decode the token are who  user connected
+            const { userId, email } = await verifyJWT(refreshToken, foundToken.privateKey);
+            await KeyTokenService.deleteKeyById(userId);
+            throw new ForbiddenError('Something wrong happened !! Pls relogin');
+        }
+
+        //
+        const holderToken = await KeyTokenService.findByRefreshToken(refreshToken);
+        if (!holderToken) throw new AuthFailureError('Shop not registered');
+
+        // verify token
+        const { userId, email } = await verifyJWT(refreshToken, holderToken.privateKey);
+        // check userId
+        const foundShop = await findByEmail({ email });
+        if (!foundShop) throw new AuthFailureError('Shop not registered');
+        // create new token
+        const tokens = await createTokenPair({ userId, email }, holderToken.publicKey, holderToken.privateKey);
+
+        // update token
+        await holderToken.update({
+            $set: {
+                refreshToken: tokens.refreshToken,
+            },
+            $addToSet: {
+                refreshTokensUsed: refreshToken,
+            },
+        });
+
+        return {
+            user: {
+                userId,
+                email,
+            },
+            tokens,
+        };
+    };
+
+    static handlerRefreshTokenV2 = async ({ refreshToken, user, keyStore }) => {
+        const { userId, email } = user;
+        if (keyStore.refreshTokensUsed.includes(refreshToken)) {
+            await KeyTokenService.deleteKeyById(userId);
+            throw new ForbiddenError('Something wrong happened !! Pls relogin');
+        }
+
+        if (keyStore.refreshToken !== refreshToken) throw new AuthFailureError('Shop not registered');
+
+        const foundShop = await findByEmail({ email });
+        if (!foundShop) throw new AuthFailureError('Shop not registered');
+        // create new token
+        const tokens = await createTokenPair({ userId, email }, keyStore.publicKey, keyStore.privateKey);
+
+        // update token
+        await keyStore.update({
+            $set: {
+                refreshToken: tokens.refreshToken,
+            },
+            $addToSet: {
+                refreshTokensUsed: refreshToken,
+            },
+        });
+
+        return {
+            user,
+            tokens,
+        };
+    };
+
+    static logout = async (keyStore) => {
         const delKey = await KeyTokenService.removeKeyById(keyStore._id);
         return delKey;
     };
