@@ -3,7 +3,7 @@
 const express = require('express');
 const accessControler = require('../../controllers/access.controler');
 const { asyncHandler } = require('../../auth/checkAuth');
-const { authentication } = require('../../auth/authUtils');
+const { authentication, authenticationV2 } = require('../../auth/authUtils');
 
 const router = express.Router();
 // sigup

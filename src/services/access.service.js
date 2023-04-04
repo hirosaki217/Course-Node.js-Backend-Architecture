@@ -76,7 +76,7 @@ class AccessService {
         const tokens = await createTokenPair({ userId, email }, keyStore.publicKey, keyStore.privateKey);
 
         // update token
-        await keyStore.update({
+        await keyStore.updateOne({
             $set: {
                 refreshToken: tokens.refreshToken,
             },
