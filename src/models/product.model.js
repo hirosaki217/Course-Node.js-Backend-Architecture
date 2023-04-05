@@ -1,8 +1,10 @@
 'use strict';
 
 const { Schema, model, Types } = require('mongoose');
+const slugify = require('slugify');
 const COLLECTION_NAME = 'Products';
 const DOCUMENT_NAME = 'Product';
+
 const productSchema = new Schema(
     {
         product_name: {
@@ -42,6 +44,32 @@ const productSchema = new Schema(
             type: Schema.Types.Mixed,
             required: true,
         },
+
+        product_slug: String,
+
+        product_ratingAvenge: {
+            type: Number,
+            default: 4.5,
+            min: [1, 'Rating must be above 1.0'],
+            max: [5, 'Rating must be between 1.0 and 5.0'],
+            set: (val) => Math.round(val * 10) / 10,
+        },
+        product_variations: {
+            type: Array,
+            default: [],
+        },
+        isDraft: {
+            type: Boolean,
+            default: true,
+            index: true,
+            select: false,
+        },
+        isPublished: {
+            type: Boolean,
+            default: false,
+            index: true,
+            select: false,
+        },
     },
 
     {
@@ -49,6 +77,17 @@ const productSchema = new Schema(
         timestamps: true,
     },
 );
+
+// create index for search
+
+productSchema.index({ product_name: 'text', product_description: 'text' });
+
+// Document middleware: run before .save() and .create()
+
+productSchema.pre('save', function (next) {
+    this.product_slug = slugify(this.product_name, { lower: true });
+    next();
+});
 
 const clothingSchema = new Schema(
     {
